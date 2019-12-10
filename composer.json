@@ -1,0 +1,38 @@
+{
+    "name": "dymantic/sml-mediabroker",
+    "description": "Media broker fir dymantic/multilingual-posts that uses spatie/laravel-medialibrary",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Joyner",
+            "email": "joyner.michael@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "spatie/laravel-medialibrary": "^7.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "phpunit/phpunit": "^8.3",
+        "dymantic/multilingual-posts": "^0.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dymantic\\SmlMediaBroker\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dymantic\\SmlMediaBroker\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dymantic\\SmlMediaBroker\\SmlMediaBrokerServiceProvider"
+            ]
+        }
+    }
+}

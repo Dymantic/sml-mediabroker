@@ -55,51 +55,62 @@ abstract class TestCase extends Orchestra
         ]);
 
         $app['config']->set('medialibrary', [
-            'disk_name'                => 'media',
-            'max_file_size'            => 1024 * 1024 * 10,
-            'queue_name'               => '',
-            'media_model'              => \Spatie\MediaLibrary\Models\Media::class,
-            'image_driver'             => 'gd',
-            'url_generator'            => null,
-            'path_generator'           => null,
-            's3'                       => [
-                'domain' => 'https://xxxxxxx.s3.amazonaws.com',
-            ],
-            'remote'                   => [
+            'disk_name' => 'media',
+            'max_file_size' => 1024 * 1024 * 10,
+            'queue_name' => '',
+            'queue_conversions_by_default' => env('QUEUE_CONVERSIONS_BY_DEFAULT', true),
+            'media_model' => \Spatie\MediaLibrary\MediaCollections\Models\Media::class,
+            'remote' => [
                 'extra_headers' => [
                     'CacheControl' => 'max-age=604800',
                 ],
             ],
-            'image_generators'         => [
-                \Spatie\MediaLibrary\ImageGenerators\FileTypes\Image::class,
-                \Spatie\MediaLibrary\ImageGenerators\FileTypes\Pdf::class,
-                \Spatie\MediaLibrary\ImageGenerators\FileTypes\Svg::class,
-                \Spatie\MediaLibrary\ImageGenerators\FileTypes\Video::class,
+            'responsive_images' => [
+                'use_tiny_placeholders' => true,
+                'tiny_placeholder_generator' => \Spatie\MediaLibrary\ResponsiveImages\TinyPlaceholderGenerator\Blurred::class,
             ],
-            'image_optimizers'         => [
+            'default_loading_attribute_value' => null,
+            'conversion_file_namer' => \Spatie\MediaLibrary\Conversions\DefaultConversionFileNamer::class,
+            'path_generator' => \Spatie\MediaLibrary\Support\PathGenerator\DefaultPathGenerator::class,
+            'url_generator' => \Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator::class,
+            'version_urls' => false,
+            'image_optimizers' => [
                 \Spatie\ImageOptimizer\Optimizers\Jpegoptim::class => [
-                    '--strip-all',  // this strips out all text information such as comments and EXIF data
-                    '--all-progressive',  // this will make sure the resulting image is a progressive one
+                    '--strip-all',
+                    '--all-progressive',
                 ],
-                \Spatie\ImageOptimizer\Optimizers\Pngquant::class  => [
+                \Spatie\ImageOptimizer\Optimizers\Pngquant::class => [
                     '--force', // required parameter for this package
                 ],
-                \Spatie\ImageOptimizer\Optimizers\Optipng::class   => [
+                \Spatie\ImageOptimizer\Optimizers\Optipng::class => [
                     '-i0', // this will result in a non-interlaced, progressive scanned image
-                    '-o2',  // this set the optimization level to two (multiple IDAT compression trials)
+                    '-o2', // this set the optimization level to two (multiple IDAT compression trials)
                     '-quiet', // required parameter for this package
                 ],
-                \Spatie\ImageOptimizer\Optimizers\Svgo::class      => [
+                \Spatie\ImageOptimizer\Optimizers\Svgo::class => [
                     '--disable=cleanupIDs', // disabling because it is known to cause troubles
                 ],
-                \Spatie\ImageOptimizer\Optimizers\Gifsicle::class  => [
+                \Spatie\ImageOptimizer\Optimizers\Gifsicle::class => [
                     '-b', // required parameter for this package
                     '-O3', // this produces the slowest but best results
                 ],
             ],
+            'image_generators' => [
+                \Spatie\MediaLibrary\Conversions\ImageGenerators\Image::class,
+                \Spatie\MediaLibrary\Conversions\ImageGenerators\Webp::class,
+                \Spatie\MediaLibrary\Conversions\ImageGenerators\Pdf::class,
+                \Spatie\MediaLibrary\Conversions\ImageGenerators\Svg::class,
+                \Spatie\MediaLibrary\Conversions\ImageGenerators\Video::class,
+            ],
+            'image_driver' => env('IMAGE_DRIVER', 'gd'),
+            'ffmpeg_path' => env('FFMPEG_PATH', '/usr/bin/ffmpeg'),
+            'ffprobe_path' => env('FFPROBE_PATH', '/usr/bin/ffprobe'),
             'temporary_directory_path' => null,
-            'ffmpeg_binaries'          => '/usr/bin/ffmpeg',
-            'ffprobe_binaries'         => '/usr/bin/ffprobe',
+            'jobs' => [
+                'perform_conversions' => \Spatie\MediaLibrary\Conversions\Jobs\PerformConversionsJob::class,
+                'generate_responsive_images' => \Spatie\MediaLibrary\ResponsiveImages\Jobs\GenerateResponsiveImagesJob::class,
+            ],
+            'media_downloader' => \Spatie\MediaLibrary\Downloaders\DefaultDownloader::class,
         ]);
 
         $app->bind('path.public', function () {
@@ -131,12 +142,14 @@ abstract class TestCase extends Orchestra
 
         $app['db']->connection()->getSchemaBuilder()->create('media', function (Blueprint $table) {
             $table->increments('id');
+            $table->uuid('uuid')->nullable();
             $table->morphs('model');
             $table->string('collection_name');
             $table->string('name');
             $table->string('file_name');
             $table->string('mime_type')->nullable();
             $table->string('disk');
+            $table->string('conversions_disk')->nullable();
             $table->unsignedInteger('size');
             $table->json('manipulations');
             $table->json('custom_properties');

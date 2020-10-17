@@ -5,10 +5,10 @@ namespace Dymantic\SmlMediaBroker;
 
 
 use Dymantic\MultilingualPosts\Post;
-use Spatie\MediaLibrary\Models\Media;
 use Dymantic\MultilingualPosts\Image;
 use Dymantic\MultilingualPosts\MediaBroker;
 use Dymantic\MultilingualPosts\ImageConversions;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class SmlMediaBroker implements MediaBroker
 {

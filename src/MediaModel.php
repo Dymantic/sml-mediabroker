@@ -8,19 +8,19 @@ use Dymantic\MultilingualPosts\ImageConversions;
 use Dymantic\MultilingualPosts\PostImageConversion;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Image\Manipulations;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
-use Spatie\MediaLibrary\Models\Media;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaModel extends Model implements HasMedia
 {
-    use HasMediaTrait;
+    use InteractsWithMedia;
 
     protected $table = 'multilingual_posts_media_models';
 
     protected $fillable = ['post_id'];
 
-    public function registerMediaConversions(Media $media = null)
+    public function registerMediaConversions(Media $media = null): void
     {
         ImageConversions::configured()->each(function ($conversion) {
             $this->addConversion($conversion);

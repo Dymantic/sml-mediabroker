@@ -54,6 +54,21 @@ abstract class TestCase extends Orchestra
             'root'   => __DIR__ . '/temp/media',
         ]);
 
+//        $app['config']->set('sluggable', [
+//            'source'             => null,
+//            'method'             => null,
+//            'onUpdate'           => false,
+//            'separator'          => '-',
+//            'unique'             => true,
+//            'uniqueSuffix'       => null,
+//            'firstUniqueSuffix'  => 2,
+//            'includeTrashed'     => false,
+//            'reserved'           => null,
+//            'maxLength'          => null,
+//            'maxLengthKeepWords' => true,
+//            'slugEngineOptions'  => [],
+//        ]);
+
         $app['config']->set('medialibrary', [
             'disk_name' => 'media',
             'max_file_size' => 1024 * 1024 * 10,

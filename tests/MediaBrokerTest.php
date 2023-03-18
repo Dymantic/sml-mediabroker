@@ -18,6 +18,20 @@ class MediaLibraryMediaBrokerTest extends TestCase
      */
     public function it_sets_a_title_image()
     {
+        config(['sluggable' => [
+            'source'             => null,
+            'method'             => null,
+            'onUpdate'           => false,
+            'separator'          => '-',
+            'unique'             => true,
+            'uniqueSuffix'       => null,
+            'firstUniqueSuffix'  => 2,
+            'includeTrashed'     => false,
+            'reserved'           => null,
+            'maxLength'          => null,
+            'maxLengthKeepWords' => true,
+            'slugEngineOptions'  => [],
+        ]]);
         $broker = new SmlMediaBroker();
         $post = Post::create(['title' => 'test post']);
 
